@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "SignBridge",
+    "slug": "signbridge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0f1117"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f1117"
+      },
+      "package": "dev.signbridge.app"
+    },
+    "ios": {
+      "bundleIdentifier": "dev.signbridge.app"
+    }
+  }
+}
