@@ -2,6 +2,7 @@ import { Component, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Header } from "./components/Header";
+import { DownloadAPKBanner } from "./components/DownloadAPKBanner";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
 import { GestureDetailPage } from "./pages/GestureDetailPage";
@@ -54,6 +55,7 @@ export default function App() {
               }
             />
           </Routes>
+          <DownloadAPKBanner />
         </BrowserRouter>
       </QueryClientProvider>
     </ErrorBoundary>
