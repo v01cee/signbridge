@@ -33,6 +33,11 @@ Thumbs.db
 # Claude internal
 .claude/
 
+# Signing keys — НИКОГДА не коммитить!
+.secrets/
+*.keystore
+signing-key-info.txt
+
 # Icons generator (temp)
 frontend/public/make-icons.cjs
 frontend/public/generate-icons.html

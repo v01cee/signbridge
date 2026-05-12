@@ -1,12 +1,8 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "dev.signbridge.app",
-      "sha256_cert_fingerprints": [
-        "REPLACE_WITH_SHA256_FROM_PWA_BUILDER_ZIP"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "dev.signbridge.app",
+    "sha256_cert_fingerprints": ["39:C1:35:1A:76:77:34:1D:9E:0E:EA:3C:E4:41:A4:AD:87:6B:5E:9F:78:9A:82:AB:EC:31:B8:DF:4D:98:25:B4"]
   }
-]
+}]
