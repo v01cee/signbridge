@@ -5,6 +5,7 @@ import { fetchGesture } from "../api/gestures";
 import { fetchFavorites, addFavorite, removeFavorite } from "../api/favorites";
 import { useAuthStore } from "../store/authStore";
 import { MOCK_CATEGORIES } from "../data/mockGestures";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 const HAND_EMOJIS = ["🤟", "✋", "👋", "🤙", "👌", "✌️", "🤞", "🖐️"];
 const getEmoji = (id: number) => HAND_EMOJIS[id % HAND_EMOJIS.length];
@@ -15,6 +16,7 @@ export function GestureDetailPage() {
   const queryClient = useQueryClient();
   const { token } = useAuthStore();
   const [mediaIndex, setMediaIndex] = useState(0);
+  const isMobile = useIsMobile();
 
   const { data: gesture, isLoading, isError } = useQuery({
     queryKey: ["gesture", id],
@@ -66,12 +68,16 @@ export function GestureDetailPage() {
     (gesture.category_id ? `#${gesture.category_id}` : null);
 
   return (
-    <main style={styles.main}>
+    <main style={{ ...styles.main, padding: isMobile ? "16px 16px 80px" : "32px 24px 64px" }}>
       <Link to="/" style={styles.breadcrumb}>← Словарь</Link>
 
-      <div style={styles.card}>
+      <div style={{
+        ...styles.card,
+        gridTemplateColumns: isMobile ? "1fr" : "340px 1fr",
+        gap: isMobile ? 0 : 32,
+      }}>
         {/* Медиа-превью */}
-        <div style={styles.preview}>
+        <div style={{ ...styles.preview, minHeight: isMobile ? 220 : 320 }}>
           {currentMedia ? (
             currentMedia.media_type === "video" ? (
               <video
@@ -112,9 +118,9 @@ export function GestureDetailPage() {
         </div>
 
         {/* Инфо */}
-        <div style={styles.info}>
+        <div style={{ ...styles.info, padding: isMobile ? "24px 20px" : "40px 32px 40px 0" }}>
           <div style={styles.header}>
-            <h1 style={styles.title}>{gesture.title}</h1>
+            <h1 style={{ ...styles.title, fontSize: isMobile ? 22 : 32 }}>{gesture.title}</h1>
             <div style={styles.headerActions}>
               {categoryName && (
                 <span style={styles.categoryBadge}>{categoryName}</span>
@@ -141,7 +147,7 @@ export function GestureDetailPage() {
             <p style={styles.noDesc}>Описание отсутствует</p>
           )}
 
-          <div style={styles.meta}>
+          <div style={{ ...styles.meta, flexWrap: "wrap" as const, gap: isMobile ? 20 : 32 }}>
             <div style={styles.metaItem}>
               <span style={styles.metaLabel}>Создан</span>
               <span style={styles.metaValue}>
