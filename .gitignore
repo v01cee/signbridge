@@ -38,6 +38,9 @@ Thumbs.db
 *.keystore
 signing-key-info.txt
 
+# Audit screenshots (локальные)
+.audit/
+
 # Icons generator (temp)
 frontend/public/make-icons.cjs
 frontend/public/generate-icons.html
