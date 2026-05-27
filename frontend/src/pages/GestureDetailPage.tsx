@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchGesture } from "../api/gestures";
 import { fetchFavorites, addFavorite, removeFavorite } from "../api/favorites";
 import { useAuthStore } from "../store/authStore";
-import { MOCK_CATEGORIES } from "../data/mockGestures";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useCategories } from "../hooks/useCategories";
 
 const HAND_EMOJIS = ["🤟", "✋", "👋", "🤙", "👌", "✌️", "🤞", "🖐️"];
 const getEmoji = (id: number) => HAND_EMOJIS[id % HAND_EMOJIS.length];
@@ -17,6 +17,7 @@ export function GestureDetailPage() {
   const { token } = useAuthStore();
   const [mediaIndex, setMediaIndex] = useState(0);
   const isMobile = useIsMobile();
+  const { getCategoryName } = useCategories();
 
   const { data: gesture, isLoading, isError } = useQuery({
     queryKey: ["gesture", id],
@@ -63,9 +64,7 @@ export function GestureDetailPage() {
   const mediaList = gesture.media ?? [];
   const currentMedia = mediaList[mediaIndex] ?? null;
 
-  const categoryName =
-    MOCK_CATEGORIES.find((c) => c.id === gesture.category_id)?.name ??
-    (gesture.category_id ? `#${gesture.category_id}` : null);
+  const categoryName = getCategoryName(gesture.category_id);
 
   return (
     <main style={{ ...styles.main, padding: isMobile ? "16px 16px 80px" : "32px 24px 64px" }}>

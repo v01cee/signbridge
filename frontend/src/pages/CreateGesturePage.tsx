@@ -2,17 +2,21 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createGesture } from "../api/gestures";
+import { useAuthStore } from "../store/authStore";
+import { useCategories } from "../hooks/useCategories";
 import type { GestureCreate } from "../types";
 
 export function CreateGesturePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { token } = useAuthStore();
+  const { categories } = useCategories();
 
-  const [form, setForm] = useState<GestureCreate>({ title: "", description: "" });
-  const [errors, setErrors] = useState<Partial<GestureCreate>>({});
+  const [form, setForm] = useState<GestureCreate>({ title: "", description: "", category_id: undefined });
+  const [errors, setErrors] = useState<Partial<Record<keyof GestureCreate, string>>>({});
 
   const mutation = useMutation({
-    mutationFn: createGesture,
+    mutationFn: (data: GestureCreate) => createGesture(data, token ?? undefined),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["gestures"] });
       navigate(`/gestures/${data.id}`);
@@ -20,7 +24,7 @@ export function CreateGesturePage() {
   });
 
   function validate(): boolean {
-    const e: Partial<GestureCreate> = {};
+    const e: Partial<Record<keyof GestureCreate, string>> = {};
     if (!form.title.trim()) e.title = "Название обязательно";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -32,6 +36,7 @@ export function CreateGesturePage() {
     mutation.mutate({
       title: form.title.trim(),
       description: form.description?.trim() || undefined,
+      category_id: form.category_id,
     });
   }
 
@@ -59,6 +64,26 @@ export function CreateGesturePage() {
               disabled={mutation.isPending}
             />
             {errors.title && <p style={styles.fieldError}>{errors.title}</p>}
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>Категория</label>
+            <select
+              style={styles.input}
+              value={form.category_id ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  category_id: e.target.value ? Number(e.target.value) : undefined,
+                }))
+              }
+              disabled={mutation.isPending}
+            >
+              <option value="">— Без категории —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
           <div style={styles.field}>

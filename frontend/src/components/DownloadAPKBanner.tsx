@@ -1,16 +1,20 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useIsStandalone } from "../hooks/useIsStandalone";
 
 const APK_URL = "/SignBridge.apk";
+// Страницы, где НЕ показываем баннер (формы, защищённые страницы)
+const HIDE_ON = ["/login", "/register", "/create", "/favorites"];
 
 export function DownloadAPKBanner() {
+  const { pathname } = useLocation();
   const isStandalone = useIsStandalone();
   const [dismissed, setDismissed] = useState(
     () => sessionStorage.getItem("apk-banner-dismissed") === "1",
   );
 
-  // Внутри установленного приложения — не показываем
-  if (isStandalone || dismissed) return null;
+  // Внутри установленного приложения / на формах — не показываем
+  if (isStandalone || dismissed || HIDE_ON.includes(pathname)) return null;
 
   function dismiss() {
     sessionStorage.setItem("apk-banner-dismissed", "1");

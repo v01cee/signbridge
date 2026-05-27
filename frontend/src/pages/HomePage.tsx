@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { fetchGestures, fetchCategories, usingMock } from "../api/gestures";
-import { MOCK_CATEGORIES } from "../data/mockGestures";
+import { fetchGestures, usingMock } from "../api/gestures";
 import { GestureCard } from "../components/GestureCard";
 import { SearchBar } from "../components/SearchBar";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { useCategories } from "../hooks/useCategories";
 
 export function HomePage() {
   const [search, setSearch] = useState("");
   const [activeCat, setActiveCat] = useState<number | null>(null);
   const isMobile = useIsMobile();
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
+  const { categories, getCategoryName } = useCategories();
 
   const { data: filtered = [], isLoading } = useQuery({
     queryKey: ["gestures", search, activeCat],
@@ -92,9 +89,11 @@ export function HomePage() {
         {!isLoading && filtered.length > 0 && (
           <div style={styles.grid}>
             {filtered.map((g) => (
-              <GestureCard key={g.id} gesture={g} categoryName={
-                MOCK_CATEGORIES.find((c) => c.id === g.category_id)?.name
-              } />
+              <GestureCard
+                key={g.id}
+                gesture={g}
+                categoryName={getCategoryName(g.category_id) ?? undefined}
+              />
             ))}
           </div>
         )}

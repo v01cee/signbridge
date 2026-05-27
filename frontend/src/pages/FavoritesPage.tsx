@@ -4,9 +4,10 @@ import { fetchFavorites } from "../api/favorites";
 import { fetchGesture } from "../api/gestures";
 import { useAuthStore } from "../store/authStore";
 import { GestureCard } from "../components/GestureCard";
-import { MOCK_CATEGORIES } from "../data/mockGestures";
+import { useCategories } from "../hooks/useCategories";
 
 function FavoriteGestureCard({ gestureId }: { gestureId: number }) {
+  const { getCategoryName } = useCategories();
   const { data: gesture } = useQuery({
     queryKey: ["gesture", gestureId],
     queryFn: () => fetchGesture(gestureId),
@@ -16,7 +17,7 @@ function FavoriteGestureCard({ gestureId }: { gestureId: number }) {
     return <div style={styles.skeletonCard} />;
   }
 
-  const categoryName = MOCK_CATEGORIES.find((c) => c.id === gesture.category_id)?.name;
+  const categoryName = getCategoryName(gesture.category_id) ?? undefined;
   return <GestureCard gesture={gesture} categoryName={categoryName} />;
 }
 

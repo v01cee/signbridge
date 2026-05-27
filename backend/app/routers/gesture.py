@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_session
+from app.core.dependencies import get_current_user, get_session
+from app.models.user import User
 from app.schemas.gesture import GestureCreate, GestureRead
 from app.services.gesture import GestureService
 
@@ -12,6 +13,7 @@ router = APIRouter(prefix="/gestures", tags=["gestures"])
 async def create_gesture(
     data: GestureCreate,
     session: AsyncSession = Depends(get_session),
+    _user: User = Depends(get_current_user),
 ) -> GestureRead:
     service = GestureService(session)
     return await service.create(data)
