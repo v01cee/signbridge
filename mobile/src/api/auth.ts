@@ -1,22 +1,19 @@
-import { apiFetch } from './client';
+import { apiFetch, apiJson, BASE_URL } from './client';
 import type { User } from '../types';
 
 export async function login(email: string, password: string): Promise<string> {
   const body = new URLSearchParams({ username: email, password });
-  const res = await fetch(
-    `${(await import('./client')).BASE_URL}/auth/login`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
-    },
-  );
+  const res = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || 'Ошибка входа');
   }
   const data = await res.json();
-  return data.access_token;
+  return data.access_token as string;
 }
 
 export async function register(
@@ -24,19 +21,13 @@ export async function register(
   username: string,
   password: string,
 ): Promise<User> {
-  const res = await apiFetch('/auth/register', {
+  return apiJson<User>('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, username, password }),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || 'Ошибка регистрации');
-  }
-  return res.json();
 }
 
 export async function fetchMe(token: string): Promise<User> {
   const res = await apiFetch('/auth/me', {}, token);
-  if (!res.ok) throw new Error('Не авторизован');
-  return res.json();
+  return res.json() as Promise<User>;
 }
