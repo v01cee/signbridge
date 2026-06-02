@@ -1,6 +1,6 @@
 export const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ||
-  'https://treasurer-routes-node-intro.trycloudflare.com/api/v1';
+  'https://signbridge.duckdns.org/api/v1';
 
 export class ApiError extends Error {
   status: number;
