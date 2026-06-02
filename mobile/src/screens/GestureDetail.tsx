@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation';
 import ScreenContainer from '../components/ScreenContainer';
@@ -130,16 +131,26 @@ const GestureDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     ? categories.find(c => c.id === gesture.category_id) ?? null
     : null;
   const gradientColor = getGradient(gesture.id)[0];
-  const firstImage = gesture.media?.find(m => m.media_type === 'image');
+  const firstMedia = gesture.media?.[0];
 
   return (
     <ScreenContainer scroll scrollViewProps={{ showsVerticalScrollIndicator: false }}>
       <Header title={gesture.title} onBack={() => navigation.goBack()} />
 
-      <View style={[styles.preview, { backgroundColor: firstImage ? colors.bgCard : gradientColor }]}>
-        {firstImage ? (
+      <View style={[styles.preview, { backgroundColor: firstMedia ? colors.bgCard : gradientColor }]}>
+        {firstMedia?.media_type === 'video' ? (
+          <Video
+            source={{ uri: firstMedia.file_url }}
+            style={styles.previewImage}
+            resizeMode={ResizeMode.CONTAIN}
+            shouldPlay
+            isLooping
+            isMuted
+            useNativeControls={false}
+          />
+        ) : firstMedia?.media_type === 'image' || firstMedia?.media_type === 'gif' ? (
           <Image
-            source={{ uri: firstImage.file_url }}
+            source={{ uri: firstMedia.file_url }}
             style={styles.previewImage}
             resizeMode="contain"
           />

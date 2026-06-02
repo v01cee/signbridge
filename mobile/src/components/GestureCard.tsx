@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, View, Text, StyleSheet, Image } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import { colors, radius, spacing } from '../theme';
 import { getEmoji, getGradient } from '../utils/emoji';
 import type { Gesture } from '../types';
@@ -13,14 +14,24 @@ interface Props {
 const GestureCard: React.FC<Props> = ({ gesture, categoryName, onPress }) => {
   const gradient = getGradient(gesture.id);
   const emoji = getEmoji(gesture.id);
-  const firstImage = gesture.media?.find(m => m.media_type === 'image');
+  const firstMedia = gesture.media?.[0];
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={[styles.top, { backgroundColor: gradient[0] }]}>
-        {firstImage ? (
+        {firstMedia?.media_type === 'video' ? (
+          <Video
+            source={{ uri: firstMedia.file_url }}
+            style={styles.topImage}
+            resizeMode={ResizeMode.COVER}
+            shouldPlay
+            isLooping
+            isMuted
+            useNativeControls={false}
+          />
+        ) : firstMedia?.media_type === 'image' || firstMedia?.media_type === 'gif' ? (
           <Image
-            source={{ uri: firstImage.file_url }}
+            source={{ uri: firstMedia.file_url }}
             style={styles.topImage}
             resizeMode="cover"
           />

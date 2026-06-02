@@ -23,10 +23,25 @@ function getGradient(id: number) {
 }
 
 export function GestureCard({ gesture, categoryName }: Props) {
+  const firstMedia = gesture.media?.[0];
   return (
     <Link to={`/gestures/${gesture.id}`} style={styles.card}>
       <div style={{ ...styles.thumb, background: getGradient(gesture.id) }}>
-        <span style={styles.emoji}>{getEmoji(gesture.id)}</span>
+        {firstMedia?.media_type === "video" ? (
+          <video
+            src={firstMedia.file_url}
+            style={styles.media}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          />
+        ) : firstMedia?.media_type === "image" || firstMedia?.media_type === "gif" ? (
+          <img src={firstMedia.file_url} alt={gesture.title} style={styles.media} />
+        ) : (
+          <span style={styles.emoji}>{getEmoji(gesture.id)}</span>
+        )}
       </div>
       <div style={styles.body}>
         {categoryName && <span style={styles.catBadge}>{categoryName}</span>}
@@ -56,8 +71,14 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   emoji: { fontSize: 56 },
+  media: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  } as React.CSSProperties,
   body: { padding: "16px" },
   title: {
     fontSize: 16,

@@ -156,6 +156,26 @@ async def run():
 
         # ─── 3. Алфавит ───
         alphabet_cat_id = cat_id_by_slug["alphabet"]
+        # Папка с пользовательскими медиа (mp4/jpg/png/gif для каждой буквы)
+        UPLOADS_DIR = "/app/uploads/letters"
+        # Полный публичный URL — нужен для мобильного приложения
+        PUBLIC_BASE = os.getenv("PUBLIC_BASE_URL", "https://signbridge.duckdns.org") + "/uploads/letters"
+
+        def find_media_for_letter(letter: str) -> tuple[str, str] | None:
+            """Найти файл а.mp4 / а.jpg / А.mp4 для буквы. Вернуть (url, media_type)."""
+            if not os.path.isdir(UPLOADS_DIR):
+                return None
+            for variant in (letter.lower(), letter.upper(), letter):
+                for ext, mtype in [
+                    ("mp4", "video"), ("webm", "video"), ("mov", "video"),
+                    ("gif", "gif"),
+                    ("jpg", "image"), ("jpeg", "image"), ("png", "image"), ("webp", "image"),
+                ]:
+                    fname = f"{variant}.{ext}"
+                    if os.path.isfile(os.path.join(UPLOADS_DIR, fname)):
+                        return f"{PUBLIC_BASE}/{fname}", mtype
+            return None
+
         for order_idx, (letter, desc) in enumerate(ALPHABET):
             g = Gesture(
                 title=letter,
@@ -164,14 +184,22 @@ async def run():
             )
             session.add(g)
             await session.flush()
-            session.add(
-                Media(
-                    gesture_id=g.id,
-                    file_url=ALPHABET_CHART_OLD,
-                    media_type="image",
-                    order=0,
+
+            # Сначала — пользовательский файл из uploads/letters
+            user_media = find_media_for_letter(letter)
+            if user_media:
+                url, mtype = user_media
+                session.add(Media(gesture_id=g.id, file_url=url, media_type=mtype, order=0))
+            else:
+                # Fallback на общую таблицу из Wikimedia
+                session.add(
+                    Media(
+                        gesture_id=g.id,
+                        file_url=ALPHABET_CHART_OLD,
+                        media_type="image",
+                        order=0,
+                    )
                 )
-            )
 
         # ─── 4. Дополнительные жесты с фото ───
         for item in EXTRA_GESTURES:
