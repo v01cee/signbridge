@@ -22,9 +22,10 @@ venv/
 # Docker volumes
 postgres_data/
 
-# Uploads (user files) — но НЕ letters (там видео алфавита коммитим)
+# Uploads — коммитим только videos из words/ и letters/
 backend/uploads/*
 !backend/uploads/letters/
+!backend/uploads/words/
 
 # IDE / OS
 .DS_Store
