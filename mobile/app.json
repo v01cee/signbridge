@@ -20,6 +20,12 @@
     },
     "ios": {
       "bundleIdentifier": "dev.signbridge.app"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d2abf0a3-93e8-45a3-9de4-a249a7045a0c"
+      }
+    },
+    "owner": "v01ce"
   }
 }

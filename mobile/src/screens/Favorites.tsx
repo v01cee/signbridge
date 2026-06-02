@@ -7,6 +7,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  Image,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation';
@@ -29,10 +30,15 @@ interface FavoriteEntry {
 // Inline simple card. If Agent 3 ships GestureCard, the parent can swap it later.
 const InlineCard: React.FC<{ gesture: Gesture; onPress: () => void }> = ({ gesture, onPress }) => {
   const gradient = getGradient(gesture.id)[0];
+  const firstImage = gesture.media?.find(m => m.media_type === 'image');
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
       <View style={[styles.cardThumb, { backgroundColor: gradient }]}>
-        <Text style={styles.cardEmoji}>{getEmoji(gesture.id)}</Text>
+        {firstImage ? (
+          <Image source={{ uri: firstImage.file_url }} style={styles.cardThumbImage} resizeMode="cover" />
+        ) : (
+          <Text style={styles.cardEmoji}>{getEmoji(gesture.id)}</Text>
+        )}
       </View>
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={1}>{gesture.title}</Text>
@@ -194,7 +200,9 @@ const styles = StyleSheet.create({
     height: 88,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  cardThumbImage: { width: '100%', height: '100%' },
   cardEmoji: { fontSize: 40 },
   cardBody: { flex: 1, padding: spacing.md, justifyContent: 'center' },
   cardTitle: { color: colors.text, fontSize: 16, fontWeight: '600', marginBottom: spacing.xs },

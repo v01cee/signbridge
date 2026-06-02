@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation';
 import ScreenContainer from '../components/ScreenContainer';
@@ -130,13 +130,22 @@ const GestureDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     ? categories.find(c => c.id === gesture.category_id) ?? null
     : null;
   const gradientColor = getGradient(gesture.id)[0];
+  const firstImage = gesture.media?.find(m => m.media_type === 'image');
 
   return (
     <ScreenContainer scroll scrollViewProps={{ showsVerticalScrollIndicator: false }}>
       <Header title={gesture.title} onBack={() => navigation.goBack()} />
 
-      <View style={[styles.preview, { backgroundColor: gradientColor }]}>
-        <Text style={styles.previewEmoji}>{getEmoji(gesture.id)}</Text>
+      <View style={[styles.preview, { backgroundColor: firstImage ? colors.bgCard : gradientColor }]}>
+        {firstImage ? (
+          <Image
+            source={{ uri: firstImage.file_url }}
+            style={styles.previewImage}
+            resizeMode="contain"
+          />
+        ) : (
+          <Text style={styles.previewEmoji}>{getEmoji(gesture.id)}</Text>
+        )}
       </View>
 
       {category ? (
@@ -184,6 +193,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   previewEmoji: { fontSize: 96 },
+  previewImage: { width: '100%', height: '100%', borderRadius: radius.lg },
   badgeRow: { flexDirection: 'row', marginBottom: spacing.md },
   badge: {
     backgroundColor: colors.bgCard,
