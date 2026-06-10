@@ -2,20 +2,17 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 /**
- * Стор геймификации обучения.
+ * Стор прогресса обучения.
  *
  * Хранит прогресс пользователя в режиме «Тренировка»:
- *  - XP и уровень (вычисляется из XP),
  *  - текущую и рекордную серию правильных ответов,
  *  - «освоенность» каждого жеста (mastery 0–5),
- *  - дневную активность для серии дней подряд (streak дней).
+ *  - дневную активность для серии дней подряд (streak дней),
+ *  - суммарную статистику ответов.
  *
  * Сохраняется в localStorage и работает без авторизации —
  * чтобы тренироваться можно было даже в демо-режиме.
  */
-
-/** Сколько XP нужно на каждый следующий уровень (нарастающе). */
-export const XP_PER_LEVEL = 100;
 
 /** Максимальная «освоенность» одного жеста. */
 export const MAX_MASTERY = 5;
@@ -28,7 +25,6 @@ export interface DayLog {
 }
 
 interface ProgressState {
-  xp: number;
   totalAnswered: number;
   totalCorrect: number;
   streak: number;
@@ -40,7 +36,7 @@ interface ProgressState {
   /** Дата последней тренировки YYYY-MM-DD. */
   lastPracticed: string | null;
 
-  /** Зарегистрировать ответ. Возвращает сколько XP начислено. */
+  /** Зарегистрировать ответ. Возвращает новую длину серии. */
   recordAnswer: (gestureId: number, correct: boolean) => number;
   /** Сбросить только текущую серию (например, при выходе из сессии). */
   resetStreak: () => void;
@@ -50,17 +46,6 @@ interface ProgressState {
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
-}
-
-/** Уровень по количеству XP (1-based). */
-export function levelFromXp(xp: number): number {
-  return Math.floor(xp / XP_PER_LEVEL) + 1;
-}
-
-/** XP внутри текущего уровня и сколько до следующего. */
-export function levelProgress(xp: number): { inLevel: number; needed: number; pct: number } {
-  const inLevel = xp % XP_PER_LEVEL;
-  return { inLevel, needed: XP_PER_LEVEL, pct: Math.round((inLevel / XP_PER_LEVEL) * 100) };
 }
 
 /** Сколько дней подряд пользователь занимался (по журналу days). */
@@ -83,7 +68,6 @@ export function dayStreak(days: DayLog[]): number {
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
-      xp: 0,
       totalAnswered: 0,
       totalCorrect: 0,
       streak: 0,
@@ -96,11 +80,8 @@ export const useProgressStore = create<ProgressState>()(
         const state = get();
         const date = today();
 
-        // Серия и XP: верный ответ даёт 10 XP + бонус за серию (по 2 за каждый
-        // ответ в серии, максимум +20), неверный — обнуляет серию.
+        // Серия: верный ответ продлевает, неверный — обнуляет.
         const newStreak = correct ? state.streak + 1 : 0;
-        const streakBonus = correct ? Math.min((newStreak - 1) * 2, 20) : 0;
-        const gained = correct ? 10 + streakBonus : 0;
 
         // Mastery: +1 за верный (до MAX), −1 за неверный (не ниже 0).
         const prevMastery = state.mastery[gestureId] ?? 0;
@@ -120,7 +101,6 @@ export const useProgressStore = create<ProgressState>()(
         const trimmed = days.slice(-30);
 
         set({
-          xp: state.xp + gained,
           totalAnswered: state.totalAnswered + 1,
           totalCorrect: state.totalCorrect + (correct ? 1 : 0),
           streak: newStreak,
@@ -130,14 +110,13 @@ export const useProgressStore = create<ProgressState>()(
           lastPracticed: date,
         });
 
-        return gained;
+        return newStreak;
       },
 
       resetStreak: () => set({ streak: 0 }),
 
       reset: () =>
         set({
-          xp: 0,
           totalAnswered: 0,
           totalCorrect: 0,
           streak: 0,

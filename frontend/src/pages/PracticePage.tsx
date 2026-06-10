@@ -4,13 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchGestures, usingMock } from "../api/gestures";
 import { useCategories } from "../hooks/useCategories";
 import { useIsMobile } from "../hooks/useIsMobile";
-import {
-  useProgressStore,
-  levelFromXp,
-  levelProgress,
-  dayStreak,
-  MAX_MASTERY,
-} from "../store/progressStore";
+import { useProgressStore, dayStreak, MAX_MASTERY } from "../store/progressStore";
 import type { Gesture } from "../types";
 
 const SESSION_SIZE = 10;
@@ -59,11 +53,8 @@ export function PracticePage() {
   const [picked, setPicked] = useState<string | null>(null); // выбранный вариант (quiz)
   const [revealed, setRevealed] = useState(false); // карточка перевёрнута (cards)
   const [sessionCorrect, setSessionCorrect] = useState(0);
-  const [sessionXp, setSessionXp] = useState(0);
-  const [floatXp, setFloatXp] = useState<number | null>(null);
+  const [floatMsg, setFloatMsg] = useState<string | null>(null);
 
-  const level = levelFromXp(progress.xp);
-  const lp = levelProgress(progress.xp);
   const accuracy =
     progress.totalAnswered > 0
       ? Math.round((progress.totalCorrect / progress.totalAnswered) * 100)
@@ -90,25 +81,25 @@ export function PracticePage() {
     setPicked(null);
     setRevealed(false);
     setSessionCorrect(0);
-    setSessionXp(0);
     setPhase("play");
   }
 
-  // Авто-скрытие всплывающего «+XP».
+  // Авто-скрытие всплывающей подсказки серии.
   useEffect(() => {
-    if (floatXp == null) return;
-    const t = setTimeout(() => setFloatXp(null), 900);
+    if (floatMsg == null) return;
+    const t = setTimeout(() => setFloatMsg(null), 900);
     return () => clearTimeout(t);
-  }, [floatXp]);
+  }, [floatMsg]);
 
   const current = queue[idx];
 
   function commitAnswer(correct: boolean) {
     if (!current) return;
-    const gained = progress.recordAnswer(current.gesture.id, correct);
-    if (correct) setSessionCorrect((c) => c + 1);
-    setSessionXp((x) => x + gained);
-    if (gained > 0) setFloatXp(gained);
+    const newStreak = progress.recordAnswer(current.gesture.id, correct);
+    if (correct) {
+      setSessionCorrect((c) => c + 1);
+      setFloatMsg(newStreak >= 2 ? `Верно! 🔥 ${newStreak}` : "Верно!");
+    }
   }
 
   function handlePick(option: string) {
@@ -140,21 +131,19 @@ export function PracticePage() {
     <main style={{ ...styles.main, padding: pad }}>
       {/* HUD прогресса — всегда виден */}
       <div style={styles.hud}>
-        <div style={styles.hudBlock}>
-          <span style={styles.hudLabel}>Уровень</span>
-          <span style={styles.hudLevel}>{level}</span>
+        <div style={styles.hudBlock} title="Текущая серия правильных ответов">
+          <span style={styles.hudValue}>🔥 {progress.streak}</span>
+          <span style={styles.hudLabel}>Серия</span>
         </div>
-        <div style={{ flex: 1 }}>
-          <div style={styles.xpBarOuter}>
-            <div style={{ ...styles.xpBarInner, width: `${lp.pct}%` }} />
-          </div>
-          <span style={styles.xpText}>
-            {lp.inLevel} / {lp.needed} XP
-          </span>
+        <div style={styles.hudDivider} />
+        <div style={styles.hudBlock} title="Доля правильных ответов за всё время">
+          <span style={styles.hudValue}>{accuracy}%</span>
+          <span style={styles.hudLabel}>Точность</span>
         </div>
-        <div style={styles.hudBlock} title="Серия дней подряд">
-          <span style={styles.hudLabel}>Дней 🔥</span>
-          <span style={styles.hudLevel}>{days}</span>
+        <div style={styles.hudDivider} />
+        <div style={styles.hudBlock} title="Дней подряд с тренировками">
+          <span style={styles.hudValue}>{days}</span>
+          <span style={styles.hudLabel}>Дней подряд</span>
         </div>
       </div>
 
@@ -164,8 +153,8 @@ export function PracticePage() {
           <section style={styles.hero}>
             <h1 style={{ ...styles.title, fontSize: isMobile ? 26 : 38 }}>Тренировка жестов</h1>
             <p style={styles.sub}>
-              Закрепляйте жесты в игровой форме: отвечайте на вопросы, набирайте XP и
-              повышайте уровень освоения каждого жеста.
+              Закрепляйте жесты в игровой форме: отвечайте на вопросы, держите серию
+              и повышайте уровень освоения каждого жеста.
             </p>
           </section>
 
@@ -356,8 +345,8 @@ export function PracticePage() {
           {/* Мастерство текущего жеста */}
           <MasteryStars value={progress.mastery[current.gesture.id] ?? 0} />
 
-          {/* Всплывающий +XP */}
-          {floatXp != null && <div style={styles.floatXp}>+{floatXp} XP</div>}
+          {/* Всплывающая подсказка серии */}
+          {floatMsg != null && <div style={styles.floatMsg}>{floatMsg}</div>}
 
           <button style={styles.quitLink} onClick={() => setPhase("setup")}>
             Завершить тренировку
@@ -383,9 +372,9 @@ export function PracticePage() {
           </p>
 
           <div style={styles.resultStats}>
-            <Stat label="Заработано XP" value={`+${sessionXp}`} />
             <Stat label="Точность" value={`${Math.round((sessionCorrect / queue.length) * 100)}%`} />
-            <Stat label="Уровень" value={String(level)} />
+            <Stat label="Рекорд серии" value={String(progress.bestStreak)} />
+            <Stat label="Серия дней" value={String(days)} />
           </div>
 
           <div style={styles.resultBtns}>
@@ -440,22 +429,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "14px 18px",
     marginBottom: 28,
   },
-  hudBlock: { display: "flex", flexDirection: "column", alignItems: "center", minWidth: 52 },
+  hudBlock: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 },
+  hudValue: { fontSize: 20, fontWeight: 700, color: "var(--accent-light)" },
   hudLabel: { fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" },
-  hudLevel: { fontSize: 22, fontWeight: 700, color: "var(--accent-light)" },
-  xpBarOuter: {
-    height: 8,
-    background: "var(--bg)",
-    borderRadius: 20,
-    overflow: "hidden",
-    border: "1px solid var(--border)",
-  },
-  xpBarInner: {
-    height: "100%",
-    background: "linear-gradient(90deg, var(--accent), var(--accent-light))",
-    transition: "width 0.4s ease",
-  },
-  xpText: { fontSize: 11, color: "var(--text-muted)", marginTop: 4, display: "inline-block" },
+  hudDivider: { width: 1, alignSelf: "stretch", background: "var(--border)" },
 
   // Setup
   hero: { textAlign: "center", marginBottom: 28 },
@@ -666,17 +643,18 @@ const styles: Record<string, React.CSSProperties> = {
 
   mastery: { display: "flex", justifyContent: "center", gap: 4, marginTop: 24 },
 
-  floatXp: {
+  floatMsg: {
     position: "absolute",
     top: 100,
     left: "50%",
     transform: "translateX(-50%)",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 800,
-    color: "var(--accent-light)",
-    textShadow: "0 2px 12px rgba(108,99,255,0.6)",
+    color: "var(--success)",
+    textShadow: "0 2px 12px rgba(76,175,130,0.55)",
     animation: "floatUp 0.9s ease-out forwards",
     pointerEvents: "none",
+    whiteSpace: "nowrap",
   },
 
   quitLink: {
