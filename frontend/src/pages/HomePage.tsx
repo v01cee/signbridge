@@ -27,6 +27,9 @@ export function HomePage() {
         <h1 style={{ ...styles.heroTitle, fontSize: isMobile ? 26 : 42 }}>Словарь языка жестов</h1>
         <p style={styles.heroSub}>Изучайте жесты, создавайте словарь и делитесь знаниями</p>
         <SearchBar value={search} onChange={setSearch} />
+        <Link to="/practice" style={styles.practiceCta}>
+          🎯 Тренировать жесты
+        </Link>
       </section>
 
       {/* Demo banner */}
@@ -131,6 +134,16 @@ const styles: Record<string, React.CSSProperties> = {
     WebkitTextFillColor: "transparent",
   },
   heroSub: { fontSize: 16, color: "var(--text-muted)", marginBottom: 8 },
+  practiceCta: {
+    display: "inline-block",
+    marginTop: 4,
+    padding: "10px 24px",
+    background: "var(--accent)",
+    borderRadius: "var(--radius-sm)",
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: 14,
+  },
   demoBanner: {
     display: "flex",
     alignItems: "center",
