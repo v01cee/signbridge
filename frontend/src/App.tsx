@@ -6,6 +6,7 @@ import { DownloadAPKBanner } from "./components/DownloadAPKBanner";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
 import { GestureDetailPage } from "./pages/GestureDetailPage";
+import { PracticePage } from "./pages/PracticePage";
 import { CreateGesturePage } from "./pages/CreateGesturePage";
 import { FavoritesPage } from "./pages/FavoritesPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -42,6 +43,7 @@ export default function App() {
           <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/practice" element={<PracticePage />} />
             <Route path="/gestures/:id" element={<GestureDetailPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/login" element={<LoginPage />} />

@@ -33,6 +33,7 @@ export function Header() {
         {!isMobile && (
           <nav style={styles.nav}>
             <Link to="/" style={activeLink("/")}>Словарь</Link>
+            <Link to="/practice" style={activeLink("/practice")}>🎯 Тренировка</Link>
             {user ? (
               <>
                 <Link to="/favorites" style={activeLink("/favorites")}>★ Избранное</Link>
@@ -61,6 +62,7 @@ export function Header() {
       {isMobile && menuOpen && (
         <div style={styles.mobileMenu}>
           <Link to="/" style={styles.mobileLink} onClick={() => setMenuOpen(false)}>📖 Словарь</Link>
+          <Link to="/practice" style={styles.mobileLink} onClick={() => setMenuOpen(false)}>🎯 Тренировка</Link>
           {user ? (
             <>
               <Link to="/favorites" style={styles.mobileLink} onClick={() => setMenuOpen(false)}>★ Избранное</Link>

@@ -20,6 +20,7 @@
 ## Возможности
 
 - 📖 **Словарь жестов** с фильтрацией по 7 категориям (Приветствия, Числа, Алфавит, Семья, Еда, Цвета, Эмоции)
+- 🎯 **Тренировка** — интерактивное заучивание жестов: викторина (угадай жест по описанию) и карточки (самопроверка) с XP, уровнями, сериями и прогрессом по каждому жесту
 - 🔍 **Полнотекстовый поиск** жестов по названию
 - 🎥 **Медиафайлы** (видео/изображения) для каждого жеста
 - ⭐ **Избранное** — сохранение жестов для авторизованных пользователей
@@ -110,11 +111,11 @@ SignBridge/
 │
 ├── frontend/                 # Web (React + Vite)
 │   ├── src/
-│   │   ├── pages/            # HomePage, GestureDetailPage, ...
+│   │   ├── pages/            # HomePage, GestureDetailPage, PracticePage, ...
 │   │   ├── components/       # GestureCard, Header, ...
 │   │   ├── api/              # HTTP клиенты
 │   │   ├── hooks/            # useCategories, useIsMobile, useIsStandalone
-│   │   ├── store/            # Zustand store
+│   │   ├── store/            # Zustand: authStore, progressStore (геймификация)
 │   │   └── data/             # mock fallback
 │   ├── public/
 │   │   ├── icon-192.png      # PWA иконки
