@@ -177,7 +177,7 @@ export function PracticePage() {
             >
               <span style={styles.modeEmoji}>🎯</span>
               <span style={styles.modeName}>Викторина</span>
-              <span style={styles.modeDesc}>Угадай жест по описанию из 4 вариантов</span>
+              <span style={styles.modeDesc}>Угадай жест по видео из 4 вариантов</span>
             </button>
             <button
               style={{ ...styles.modeCard, ...(mode === "cards" ? styles.modeCardActive : {}) }}
