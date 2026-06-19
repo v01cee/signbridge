@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGestures, usingMock } from "../api/gestures";
@@ -92,6 +92,11 @@ export function PracticePage() {
   }, [floatMsg]);
 
   const current = queue[idx];
+  // Видео текущего жеста для викторины (предпочитаем video, иначе любое медиа).
+  const currentMedia =
+    current?.gesture.media?.find((m) => m.media_type === "video") ??
+    current?.gesture.media?.[0] ??
+    null;
 
   function commitAnswer(correct: boolean) {
     if (!current) return;
@@ -252,9 +257,26 @@ export function PracticePage() {
             />
           </div>
 
-          {/* Карточка-превью */}
+          {/* Карточка-превью: в викторине показываем видео жеста, иначе эмодзи */}
           <div style={styles.preview}>
-            <span style={styles.previewEmoji}>{emojiFor(current.gesture.id)}</span>
+            {mode === "quiz" && currentMedia ? (
+              currentMedia.media_type === "video" ? (
+                <video
+                  key={currentMedia.file_url}
+                  src={currentMedia.file_url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls
+                  style={styles.previewMedia}
+                />
+              ) : (
+                <img src={currentMedia.file_url} alt="" style={styles.previewMedia} />
+              )
+            ) : (
+              <span style={styles.previewEmoji}>{emojiFor(current.gesture.id)}</span>
+            )}
             {getCategoryName(current.gesture.category_id) && (
               <span style={styles.previewCat}>{getCategoryName(current.gesture.category_id)}</span>
             )}
@@ -264,7 +286,9 @@ export function PracticePage() {
           {mode === "quiz" && (
             <>
               <p style={styles.prompt}>
-                {current.gesture.description || "Какой это жест?"}
+                {currentMedia
+                  ? "Какой жест показан на видео?"
+                  : current.gesture.description || "Какой это жест?"}
               </p>
               <div style={styles.options}>
                 {current.options.map((opt) => {
@@ -559,6 +583,13 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 10,
     marginBottom: 20,
     position: "relative",
+    overflow: "hidden",
+  },
+  previewMedia: {
+    width: "100%",
+    maxHeight: 300,
+    objectFit: "contain",
+    borderRadius: "var(--radius)",
   },
   previewEmoji: { fontSize: 64 },
   previewCat: {
